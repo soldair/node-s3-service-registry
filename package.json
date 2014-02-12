@@ -1,0 +1,20 @@
+{
+  "name": "s3-service-registry",
+  "version": "0.0.0",
+  "description": "use s3 to publish the hosts and ports of running services",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test/*.js"
+  },
+  "author": "Ryan Day <soldair@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ini": "~1.1.0",
+    "through": "~2.3.4",
+    "knox": "~0.8.9",
+    "udid": "~0.1.4"
+  },
+  "devDependencies": {
+    "tape": "~2.4.2"
+  }
+}
