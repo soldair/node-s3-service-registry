@@ -156,7 +156,6 @@ module.exports.timeout = 5000;
 module.exports.tcpCheck = function(info,cb){
   var called = false;
   var s = net.connect({host:info.host,port:info.port},function(){
-    console.log('connected> ',arguments);
     if(!called) {
       called = true;
       cb(false,true);
@@ -164,7 +163,6 @@ module.exports.tcpCheck = function(info,cb){
     }
   });
   s.on('error',function(e){
-    console.log('error> ',arguments);
     if(!called) {
       called = true;
       cb(err);
