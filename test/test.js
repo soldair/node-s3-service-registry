@@ -15,7 +15,12 @@ test("can foos",function(t){
     r.list(function(err,list){
       console.log(err,list);
       t.ok(list,'should have service file list');
-      t.end();
+
+      r.get(list[0].Key,function(err,data){
+        console.log(err,data)
+        //        
+        t.end();
+      });
     });
   });
 
