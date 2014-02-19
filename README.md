@@ -48,52 +48,60 @@ instance = ctor(s3key,s3secret,bucket)
 
 ### register(service,host,port,data,cb)
   - service
-    the name of the service
+    - the name of the service
   - host
-    the host name which can be accessed by people looking for the service
+    - the host name which can be accessed by people looking for the service
   - port
-    the service port
+    - the service port
   - data (optional)
-    an object of custom data you would like to store in the service file
+    - an object of custom data you would like to store in the service file
   - cb
-    callback
+    - callback
 
 ### online(service,check,cb)
+list online services or search online services by service name prefix
+
   - service (optional)
-    prefix serce in bucket for service
+    - prefix serce in bucket for service
   - check(info,cb) (optional)
-    run this check instead of the default tcpCheck
+    - run this check instead of the default tcpCheck
   - cb
-    callback
+    - callback
 
 
 ### offline(service,check,cb)
+list offline services or search offline services by service name prefix
+
   - service (optional)
-    prefix serce in bucket for service
+    - prefix serce in bucket for service
   - check(info,cb) (optional)
-    run this check instead of the default tcpCheck
+    - run this check instead of the default tcpCheck
   - cb
-    callback
+    - callback
 
 
 ### status(service,check,cb)
+list services or search services by service name prefix. gathers status for all services.
+
   - service (optional)
-    prefix serce in bucket for service
+    - prefix service in bucket for service
   - check(info,cb) (optional)
-    run this check instead of the default tcpCheck
+    - run this check instead of the default tcpCheck
   - cb
-    callback
+    - callback
 
 
 ### get(key,cb)
+get the services data
   - key
     the s3 name of the file. the value of Key in list objects
 
 
 ### list(service,cb)
+list services with no checks
   - service (optional)
     prefix serce in bucket for service
 
 ### clean(keys,cb)
-  delete registered services by name.
+  delete registered services by Key.
 
