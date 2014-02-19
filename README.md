@@ -1,4 +1,3 @@
-
 s3-service-registry
 ===================
 
@@ -47,7 +46,17 @@ instance = ctor(s3key,s3secret,bucket)
 ```
 ## instance methods
 
-register(service)
+### register(service,host,port,data,cb)
+  - service
+    the name of the service
+  - host
+    the host name which can be accessed by people looking for the service
+  - port
+    the service port
+  - data (optional)
+    an object of custom data you would like to store in the service file
+  - cb
+    callback
 
 ### online(service,check,cb)
   - service (optional)
