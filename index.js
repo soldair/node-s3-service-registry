@@ -54,9 +54,72 @@ module.exports = function(s3key,s3secret,bucket){
         }));
       });
     },
+    offline:function(service,check,cb){
+      if(arguments.length === 2){
+        cb = check;
+        check = module.exports.tcpCheck; 
+      } else if(arguments.length == 1){
+        cb = service;
+        service = false;
+        check = false;
+      }
+      var opts = {service:service,check:check,offline:true};
+      z._filtered(opts,cb);
+    },
+    online:function(service,check,cb){
+      if(arguments.length === 2){
+        cb = check;
+        check = module.exports.tcpCheck; 
+      } else if(arguments.length == 1){
+        cb = service;
+        service = false;
+        check = false;
+      }
+      var opts = {service:service,check:check,offline:false};
+      z._filtered(opts,cb);
+    },
+    status:function(service,check,cb){
+      if(arguments.length === 2){
+        cb = check;
+        check = module.exports.tcpCheck; 
+      } else if(arguments.length === 1){
+        cb = service;
+        service = false;
+        check = module.exports.tcpCheck; 
+      }
+
+      var z = this;
+      z.list(service,function(err,list){
+        if(err) return cb(err);
+        z.check(list,check,function(err,res){
+          if(err) return cb(err);
+
+          var out = [];
+          res.forEach(function(o){
+            out.push(o);
+          });
+          cb(false,out);
+        });
+      });
+    },
+    // use online/offline/status instead
+    _filtered:function(opts,cb){
+      var service = opts.service;
+      var check = opts.check;
+      var offline = opts.offline? true:false;
+
+      var z = this;
+      z.status(service,check,function(err,list){
+        var out = [];
+        list.forEach(function(o){
+          if(o.offline === offline) online.push(o);
+        });
+        cb(false,online);
+      });
+    },
     list:function(service,cb){
       opts = {};
-      if(typeof service == "function"){
+      if(typeof service == "function") {
         cb = service;
         service = undef;
       }
@@ -85,8 +148,7 @@ module.exports = function(s3key,s3secret,bucket){
         }
 
         // todo list data.
-        cb(err,out);
-        
+        cb(err,out);  
       });
     },
     checkLimit:10,
@@ -98,45 +160,42 @@ module.exports = function(s3key,s3secret,bucket){
       }
       // list and delete service id files where services have not checked in in a while and or fail the check.
       var z = this;
-      z.list(function(err,list){
 
-        if(err) return cb(err);
+      var c = z.checkLimit;
+      var timeout = z.staleTimeout;
 
-        var c = z.checkLimit;
-        var timeout = z.staleTimeout;
-
-        var todo = [];
-        list.forEach(function(o){
-          var mtime = +o.LastModified;
-          if(Date.now()-mtime > timeout){
-            o.stale = true;
-            o.offline = true;
-          } else {
-            // make sure its listening on the port.
-            todo.push(o);
-          }
-        });
-
-        var active = 0, started = 0
-        , job = function fn(o){
-          ++started;
-          check(o,function(err, success){
-            o.listening = success;
-            o.offline = !success;
-            if(todo.length) fn(todo.shift());
-          });
-        };
-
-        if(!todo.length){
-          return cb(false,list);
+      var todo = [];
+      list.forEach(function(o){
+        var mtime = +o.LastModified;
+        if(Date.now()-mtime > timeout){
+          o.stale = true;
+          o.offline = true;
+        } else {
+          // make sure its listening on the port.
+          todo.push(o);
         }
-
-        while(active < c && todo.length) {
-          ++active;
-          job(todo.shift());
-        }
-
       });
+
+      var active = 0, started = 0
+      , job = function fn(o){
+        ++started;
+        check(o,function(err, success){
+          active--;
+          o.listening = !!success;
+          o.offline = !success;
+          if(todo.length) fn(todo.shift());
+          else if(!active) cb(false,list);
+        });
+      };
+
+      if(!todo.length){
+        return cb(false,list);
+      }
+
+      while(active < c && todo.length) {
+        ++active;
+        job(todo.shift());
+      }
     },
     clean:function(keys,cb){
       client.deleteMultiple(keys,function(err,res){
@@ -165,7 +224,7 @@ module.exports.tcpCheck = function(info,cb){
   s.on('error',function(e){
     if(!called) {
       called = true;
-      cb(err);
+      cb(e);
     }
   });
 
